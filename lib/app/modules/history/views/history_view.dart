@@ -1,73 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:price_pilot/app/modules/history/controllers/history_controller.dart';
-import 'package:price_pilot/app/data/models/price_model.dart';
-import 'package:price_pilot/core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:price_pilot/models/price_model.dart';
+import 'package:price_pilot/models/route_model.dart';
+import '../controllers/history_controller.dart';
 
-class HistoryView extends GetView<HistoryController> {
-  const HistoryView({Key? key}) : super(key: key);
+class HistoryView extends ConsumerWidget {
+  const HistoryView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(historyControllerProvider);
+    final controller = ref.read(historyControllerProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Price History'),
-        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Recent Routes',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Obx(() => controller.isLoading.value
-              ? const Center(child: CircularProgressIndicator())
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: controller.routes.length,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: state.routes.length,
                     itemBuilder: (context, index) {
-                      final route = controller.routes[index];
+                      final route = state.routes[index];
                       return RouteCard(
                         route: route,
-                        isSelected: controller.selectedRouteId.value == route.id,
+                        isSelected: route.id == state.selectedRouteId,
                         onTap: () => controller.selectRoute(route.id),
                       );
                     },
                   ),
-                ),
-            ),
-            const SizedBox(height: 24),
-            if (controller.selectedRouteId.value != null) ...[
-              const Text(
-                'Price Trends',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Obx(() => controller.isLoadingHistory.value
+          ),
+          Expanded(
+            flex: 2,
+            child: state.isLoadingHistory
                 ? const Center(child: CircularProgressIndicator())
-                : Expanded(
-                    child: ListView.builder(
-                      itemCount: controller.priceHistory.length,
-                      itemBuilder: (context, index) {
-                        final price = controller.priceHistory[index];
-                        return PriceHistoryCard(price: price);
-                      },
-                    ),
-                  ),
-              ),
-            ],
-          ],
-        ),
+                : state.priceHistory.isEmpty
+                    ? const Center(
+                        child: Text('Select a route to view price history'),
+                      )
+                    : ListView.builder(
+                        itemCount: state.priceHistory.length,
+                        itemBuilder: (context, index) {
+                          final price = state.priceHistory[index];
+                          return PriceHistoryCard(price: price);
+                        },
+                      ),
+          ),
+        ],
       ),
     );
   }
@@ -79,47 +62,37 @@ class RouteCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const RouteCard({
-    Key? key,
+    super.key,
     required this.route,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: isSelected ? 4 : 2,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isSelected
-          ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
-          : BorderSide.none,
-      ),
+      elevation: isSelected ? 4 : 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'From: ${route.pickupLocation}',
-                style: const TextStyle(fontSize: 16),
+                route.name,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'To: ${route.dropoffLocation}',
-                style: const TextStyle(fontSize: 16),
+                '${route.startLocation} → ${route.endLocation}',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                '${route.searchCount} searches',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                'Distance: ${route.distance.toStringAsFixed(1)} km',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -133,20 +106,14 @@ class PriceHistoryCard extends StatelessWidget {
   final PriceModel price;
 
   const PriceHistoryCard({
-    Key? key,
+    super.key,
     required this.price,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isSurge = price.surgeMultiplier > 1.0;
-
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -156,41 +123,31 @@ class PriceHistoryCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  price.service,
-                  style: theme.textTheme.titleMedium,
+                  price.provider,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  '${price.currency} ${price.amount.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  '₹${price.price.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
-            if (isSurge) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.errorColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${(price.surgeMultiplier * 100 - 100).toStringAsFixed(0)}% Surge',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppTheme.errorColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+            const SizedBox(height: 8),
+            Text(
+              'Surge: ${price.surgeMultiplier}x',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              'ETA: ${price.estimatedMinutes} mins',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              'Time: ${price.timestamp.toString()}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
     );
   }
-} 
+}

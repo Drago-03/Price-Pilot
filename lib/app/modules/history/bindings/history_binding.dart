@@ -1,12 +1,8 @@
-import 'package:get/get.dart';
-import 'package:price_pilot/app/data/repositories/price_repository.dart';
-import 'package:price_pilot/app/modules/history/controllers/history_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/history_controller.dart';
 
-class HistoryBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => HistoryController(
-      priceRepository: Get.find<PriceRepository>(),
-    ));
-  }
-} 
+// Note: With Riverpod, we don't need bindings as providers are automatically handled
+// This file can be safely deleted, but keeping it for reference
+void initializeHistoryBindings() {
+  // No initialization needed for Riverpod
+}

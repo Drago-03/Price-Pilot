@@ -6,6 +6,11 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 
+// Create a provider for SharedPreferences
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
+
 Future<void> main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
@@ -18,15 +23,15 @@ Future<void> main() async {
         storageBucket: "YOUR_STORAGE_BUCKET",
       ),
     );
+
     final prefs = await SharedPreferences.getInstance();
 
-    // Initialize services here
-    // await Get.putAsync(() => StorageService().init());
-    // await Get.putAsync(() => LocationService().init());
-
     runApp(
-      const ProviderScope(
-        child: PricePilotApp(),
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const PricePilotApp(),
       ),
     );
   } catch (e) {
@@ -45,7 +50,7 @@ Future<void> main() async {
 }
 
 class PricePilotApp extends StatelessWidget {
-  const PricePilotApp({Key? key}) : super(key: key);
+  const PricePilotApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +66,7 @@ class PricePilotApp extends StatelessWidget {
 }
 
 class AuthWrapper extends ConsumerWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
+  const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

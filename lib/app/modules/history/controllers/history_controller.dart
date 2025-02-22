@@ -1,64 +1,100 @@
-import 'package:get/get.dart';
-import 'package:price_pilot/app/data/models/price_model.dart';
-import 'package:price_pilot/app/data/repositories/price_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:price_pilot/models/price_model.dart';
+import 'package:price_pilot/models/route_model.dart';
 
-class HistoryController extends GetxController {
-  final PriceRepository _priceRepository;
+final historyControllerProvider =
+    StateNotifierProvider<HistoryController, HistoryState>((ref) {
+  return HistoryController();
+});
 
-  HistoryController({
-    required PriceRepository priceRepository,
-  }) : _priceRepository = priceRepository;
+class HistoryState {
+  final bool isLoading;
+  final bool isLoadingHistory;
+  final List<RouteModel> routes;
+  final List<PriceModel> priceHistory;
+  final int? selectedRouteId;
 
-  final isLoading = false.obs;
-  final isLoadingHistory = false.obs;
-  final routes = <RouteModel>[].obs;
-  final priceHistory = <PriceModel>[].obs;
-  final selectedRouteId = RxnInt();
+  HistoryState({
+    this.isLoading = false,
+    this.isLoadingHistory = false,
+    this.routes = const [],
+    this.priceHistory = const [],
+    this.selectedRouteId,
+  });
 
-  @override
-  void onInit() {
-    super.onInit();
+  HistoryState copyWith({
+    bool? isLoading,
+    bool? isLoadingHistory,
+    List<RouteModel>? routes,
+    List<PriceModel>? priceHistory,
+    int? selectedRouteId,
+  }) {
+    return HistoryState(
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      routes: routes ?? this.routes,
+      priceHistory: priceHistory ?? this.priceHistory,
+      selectedRouteId: selectedRouteId ?? this.selectedRouteId,
+    );
+  }
+}
+
+class HistoryController extends StateNotifier<HistoryState> {
+  HistoryController() : super(HistoryState()) {
     loadRoutes();
   }
 
   Future<void> loadRoutes() async {
-    isLoading.value = true;
+    state = state.copyWith(isLoading: true);
     try {
-      final popularRoutes = await _priceRepository.getPopularRoutes();
-      routes.assignAll(popularRoutes);
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load routes',
-        snackPosition: SnackPosition.BOTTOM,
+      // TODO: Implement actual API call
+      final popularRoutes = [
+        RouteModel(
+          id: 1,
+          name: "Home to Work",
+          startLocation: "Home",
+          endLocation: "Work",
+          distance: 10.5,
+          popularityScore: 100,
+        ),
+      ];
+      state = state.copyWith(
+        routes: popularRoutes,
+        isLoading: false,
       );
-    } finally {
-      isLoading.value = false;
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
     }
   }
 
   Future<void> selectRoute(int routeId) async {
-    selectedRouteId.value = routeId;
+    state = state.copyWith(selectedRouteId: routeId);
     await loadPriceHistory(routeId);
   }
 
   Future<void> loadPriceHistory(int routeId) async {
-    isLoadingHistory.value = true;
+    state = state.copyWith(isLoadingHistory: true);
     try {
-      final history = await _priceRepository.getPriceHistory(
-        routeId,
-        DateTime.now().subtract(const Duration(days: 7)),
-        DateTime.now(),
+      // TODO: Implement actual API call
+      final history = [
+        PriceModel(
+          id: 1,
+          routeId: routeId,
+          provider: "Uber",
+          price: 250.0,
+          surgeMultiplier: 1.0,
+          timestamp: DateTime.now(),
+          estimatedMinutes: 15,
+        ),
+      ];
+      state = state.copyWith(
+        priceHistory: history,
+        isLoadingHistory: false,
       );
-      priceHistory.assignAll(history);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load price history',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isLoadingHistory.value = false;
+      state = state.copyWith(isLoadingHistory: false);
+      // Handle error
     }
   }
-} 
+}
