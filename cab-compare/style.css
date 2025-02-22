@@ -1,0 +1,303 @@
+/* General Styles */
+:root {
+    --primary-color: #FF9933;  /* Indian flag saffron */
+    --secondary-color: #138808; /* Indian flag green */
+    --accent-color: #FF6B6B;
+    --text-color: #333;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Festival Lights Animation */
+.festival-lights {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, 
+        #FF9933, #FF6B6B, #138808, #FF9933, 
+        #FF6B6B, #138808, #FF9933);
+    background-size: 200% 100%;
+    animation: festivalLights 3s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes festivalLights {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* Header Section */
+.header {
+    background: linear-gradient(135deg, #FF9933 0%, #FF6B6B 100%);
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-title {
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+}
+
+.brand-tagline {
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Search Section */
+.search-section {
+    background-color: var(--light-bg);
+    flex: 1;
+    padding: 40px 0;
+    position: relative;
+}
+
+.search-card {
+    border-radius: 20px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.search-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.search-title {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* Custom Button */
+.btn-custom {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 153, 51, 0.3);
+}
+
+/* Filter Buttons */
+.btn-filter {
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-check:checked + .btn-filter {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    border-color: transparent;
+}
+
+/* Map Container */
+.map-container {
+    position: relative;
+    height: 600px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    border-radius: 20px;
+}
+
+.route-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Fare Results */
+#fareResults {
+    background: linear-gradient(135deg, rgba(51, 51, 51, 0.95), rgba(34, 34, 34, 0.95));
+    padding: 25px;
+    border-radius: 20px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+#fareList .list-group-item {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+#fareList .list-group-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.provider-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.fare-price {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Location Button */
+.btn-location {
+    background: linear-gradient(135deg, var(--secondary-color), #2ecc71);
+    color: white;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-location:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(19, 136, 8, 0.3);
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #182848, #2b415e);
+    color: white;
+    padding: 20px 0;
+    margin-top: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .header {
+        padding: 30px 0;
+    }
+    
+    .search-section {
+        padding: 20px 0;
+    }
+    
+    .map-container {
+        height: 400px;
+        margin-top: 20px;
+    }
+    
+    .search-card {
+        margin: 10px;
+    }
+    
+    #fareList .list-group-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .provider-logo {
+        margin-bottom: 10px;
+    }
+}
+
+/* Modal Styles */
+.modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.modal .fa-location-arrow {
+    color: var(--primary-color);
+}
+
+.modal .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 153, 51, 0.3);
+}
+
+.modal .btn-secondary {
+    background: #f8f9fa;
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal .btn-secondary:hover {
+    background: #e9ecef;
+}
+
+.modal ol {
+    padding-left: 1.2rem;
+}
+
+.modal ol li {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.modal .text-muted {
+    color: #6c757d !important;
+}
+

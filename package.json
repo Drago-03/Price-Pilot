@@ -1,0 +1,22 @@
+{
+  "name": "price-pilot",
+  "version": "1.0.0",
+  "description": "### Leaving somewhere? Use cab karo to find the best deal for your travel.. <hr><br> <img src=\"https://user-images.githubusercontent.com/49815429/115147185-6e7a6700-a077-11eb-9162-ad8f7fc1c59c.PNG\" width=\"500\" height=\"350\"/> <img src=\"https://user-images.githubusercontent.com/49815429/115147192-72a68480-a077-11eb-8473-826b318b1a09.PNG\" width=\"500\" height=\"350\"/>",
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "fs": "^0.0.1-security",
+    "nodemailer": "^6.9.16",
+    "puppeteer": "^23.7.0",
+    "twilio": "^5.3.5"
+  },
+  "devDependencies": {}
+}

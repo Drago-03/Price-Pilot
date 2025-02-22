@@ -1,0 +1,32 @@
+[
+  {
+    "Service": "Uber",
+    "Details": [
+      {
+        "Fare": 0,
+        "ETA": "N/A",
+        "Status": "Error"
+      }
+    ]
+  },
+  {
+    "Service": "Ola",
+    "Details": [
+      {
+        "Fare": 0,
+        "ETA": "N/A",
+        "Status": "Error"
+      }
+    ]
+  },
+  {
+    "Service": "Rapido",
+    "Details": [
+      {
+        "Fare": 0,
+        "ETA": "N/A",
+        "Status": "Error"
+      }
+    ]
+  }
+]

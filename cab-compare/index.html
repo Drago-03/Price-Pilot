@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Pilot - Compare Cab Fares</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+
+    <!-- Google Maps API with required libraries -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzh-N6q0vgIIcdWyVk8MiSl4pTx__r5us&libraries=places,directions"></script>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login to Cab Services</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-taxi fa-3x text-primary"></i>
+                    </div>
+                    <p class="text-center">Please enter the OTP sent to 9805763104</p>
+                    <div class="login-status mb-3">
+                        <div class="service-status">
+                            <i class="fab fa-uber"></i> Uber: <span class="status">Waiting for OTP</span>
+                        </div>
+                        <div class="service-status">
+                            <i class="fas fa-car"></i> Ola: <span class="status">Waiting for OTP</span>
+                        </div>
+                        <div class="service-status">
+                            <i class="fas fa-motorcycle"></i> Rapido: <span class="status">Waiting for OTP</span>
+                        </div>
+                    </div>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="otpInput" class="form-label">Enter OTP</label>
+                            <input type="text" class="form-control" id="otpInput" placeholder="Enter OTP" required>
+                            <div class="form-text">Please enter the OTP sent to your phone</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="loginButton">Verify OTP</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Permission Modal -->
+    <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="locationModalLabel">Enable Location Access</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-location-arrow fa-3x text-primary"></i>
+                    </div>
+                    <p>To use your current location, please allow location access when prompted by your browser.</p>
+                    <p class="small text-muted">
+                        <i class="fas fa-info-circle"></i> You can always change this setting in your browser preferences.
+                    </p>
+                    <div class="mt-3">
+                        <strong>How to enable location:</strong>
+                        <ol class="mt-2">
+                            <li>Click the lock/info icon in your browser's address bar</li>
+                            <li>Find 'Location' or 'Site Settings'</li>
+                            <li>Allow location access for this site</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="requestLocationBtn">Allow Location Access</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="festival-lights"></div>
+    <header class="header">
+        <div class="container text-center">
+            <h1 class="display-4 brand-title">Price Pilot</h1>
+            <p class="lead brand-tagline">Compare and Book the Cheapest Cab with Ease</p>
+        </div>
+    </header>
+
+    <section class="search-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5">
+                    <div class="card p-4 p-md-5 shadow-lg search-card">
+                        <h4 class="text-center mb-4 search-title">Enter Pickup & Drop Locations</h4>
+                        <form id="locationForm" action="http://localhost:3000/get-fare" method="post">
+                            <div class="mb-3 position-relative">
+                                <label for="pickup" class="form-label">Pickup Location</label>
+                                <button type="button" class="btn btn-location mb-2 w-100" id="currentLocationBtn">
+                                    <i class="fas fa-location-arrow me-2"></i>
+                                    Use Current Location
+                                </button>
+                                <input type="text" id="pickup" class="form-control" name="pickup" placeholder="Enter pickup location" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="drop" class="form-label">Drop Location</label>
+                                <input type="text" id="drop" name="drop" class="form-control" placeholder="Enter drop location" required>
+                            </div>
+
+                            <div class="filter-buttons mb-4">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="filter" id="cheapest" value="cheapest" checked>
+                                    <label class="btn btn-filter" for="cheapest">
+                                        <i class="fas fa-rupee-sign"></i> Cheapest
+                                    </label>
+                                    <input type="radio" class="btn-check" name="filter" id="fastest" value="fastest">
+                                    <label class="btn btn-filter" for="fastest">
+                                        <i class="fas fa-bolt"></i> Fastest
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-custom w-100">
+                                <span class="btn-text">Compare Fares</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="fareResults" class="mt-4 d-none">
+                        <h3 class="text-center text-white mb-4">Available Cab Options</h3>
+                        <div class="list-group" id="fareList"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="map-container">
+                        <div id="map" class="rounded-lg shadow-lg"></div>
+                        <div id="routeInfo" class="route-info d-none">
+                            <div class="distance"></div>
+                            <div class="duration"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">&copy; 2025 Price Pilot. All Rights Reserved by Indie Hub.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="./script.js"></script>
+</body>
+</html>
