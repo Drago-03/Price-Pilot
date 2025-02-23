@@ -28,6 +28,17 @@ yarn-error.log*
 
 # IDE configuration (optional, but recommended)
 .idea/
+.vscode/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Keep environment examples tracked
+!.env.example
 
 # Keep all other files tracked
 !*.apk

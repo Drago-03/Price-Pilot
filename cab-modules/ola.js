@@ -1,81 +1,60 @@
 const puppeteer = require('puppeteer');
 
-async function getOla(source, dest, browserInstance, cookies) {
+async function getOla(source, destination, browserInstance) {
     try {
         const page = await browserInstance.newPage();
         
-        // Set cookies if available
-        if (cookies) {
-            await page.setCookie(...cookies);
-        }
-
-        // Navigate to Ola's booking page
-        await page.goto('https://book.olacabs.com', { waitUntil: 'networkidle0' });
-
-        // Check if logged in
-        const isLoggedIn = await page.evaluate(() => {
-            return !document.querySelector('#login-link');
+        // Set viewport and user agent
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+        
+        // Go to Ola's fare estimator page
+        await page.goto('https://book.olacabs.com/estimation', {
+            waitUntil: 'networkidle0',
+            timeout: 60000
         });
 
-        if (!isLoggedIn && !cookies) {
-            throw new Error('Not logged in to Ola');
-        }
-
         // Enter pickup location
-        await page.waitForSelector('#pickup');
-        await page.click('#pickup');
-        await page.type('#pickup', source);
-        await page.waitForTimeout(1000);
-        await page.keyboard.press('ArrowDown');
+        await page.waitForSelector('#pickup-location');
+        await page.type('#pickup-location', source);
         await page.keyboard.press('Enter');
         await page.waitForTimeout(1000);
 
         // Enter drop location
-        await page.waitForSelector('#drop');
-        await page.click('#drop');
-        await page.type('#drop', dest);
-        await page.waitForTimeout(1000);
-        await page.keyboard.press('ArrowDown');
+        await page.waitForSelector('#drop-location');
+        await page.type('#drop-location', destination);
         await page.keyboard.press('Enter');
         await page.waitForTimeout(2000);
 
-        // Wait for fare estimates to load
-        await page.waitForSelector('.ride-card', { timeout: 10000 });
+        // Wait for price estimates to load
+        await page.waitForSelector('.cab-estimate', { timeout: 10000 });
 
-        // Extract fare and ETA information
-        const fareData = await page.evaluate(() => {
-            const rides = Array.from(document.querySelectorAll('.ride-card'));
-            return rides.map(ride => {
-                const fareElement = ride.querySelector('.fare-estimate');
-                const etaElement = ride.querySelector('.eta');
-                const categoryElement = ride.querySelector('.category-name');
-
-                return {
-                    Fare: fareElement ? parseInt(fareElement.innerText.replace(/[^0-9]/g, '')) : 0,
-                    ETA: etaElement ? etaElement.innerText.replace(' min', '') : '15-20',
-                    Category: categoryElement ? categoryElement.innerText : 'Mini',
-                    Status: 'Available'
-                };
+        // Extract fare estimates
+        const estimates = await page.evaluate(() => {
+            const results = [];
+            const cards = document.querySelectorAll('.cab-estimate');
+            
+            cards.forEach(card => {
+                const type = card.querySelector('.cab-type')?.textContent?.trim() || 'N/A';
+                const fare = card.querySelector('.fare-amount')?.textContent?.trim() || 'N/A';
+                const eta = card.querySelector('.arrival-time')?.textContent?.trim() || 'N/A';
+                
+                results.push({
+                    Type: type,
+                    Fare: fare,
+                    ETA: eta
+                });
             });
+            
+            return results;
         });
 
-        // Close the page
         await page.close();
-
-        // Return the lowest fare option if multiple options are available
-        return fareData.sort((a, b) => a.Fare - b.Fare).slice(0, 1);
-
+        return estimates;
     } catch (error) {
-        console.error('Error fetching Ola fares:', error);
-        return [{
-            Fare: 0,
-            ETA: '15-20',
-            Category: 'Mini',
-            Status: 'Unavailable'
-        }];
+        console.error('Error fetching Ola prices:', error);
+        return [{ Type: 'Error', Fare: 'N/A', ETA: 'N/A' }];
     }
 }
 
-module.exports = {
-    getOla
-};
+module.exports = { getOla };
