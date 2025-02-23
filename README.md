@@ -34,7 +34,6 @@ Price Pilot is a modern web application that helps users make informed decisions
 - **Ride Services**: 
   - Uber Rides API
   - Ola API
-  - Rapido API
 
 ### Development Tools
 - **Language**: TypeScript 5.0+
@@ -76,7 +75,6 @@ Before setting up Price Pilot, ensure you have:
    VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
    VITE_UBER_CLIENT_ID=your_uber_client_id
    VITE_OLA_API_KEY=your_ola_api_key
-   VITE_RAPIDO_API_KEY=your_rapido_api_key
    ```
 
 4. **Start development server**
