@@ -4,8 +4,31 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+const { Client } = require('@googlemaps/google-maps-services-js');
+const MobilityService = require('./beckn/mobility/service');
+
+// Load environment variables
+dotenv.config();
+
 const app = express();
-const port = 3000;
+
+// Initialize Google Maps client
+const googleMapsClient = new Client({});
+
+// Beckn configuration
+const becknConfig = {
+    subscriberId: process.env.BECKN_SUBSCRIBER_ID,
+    subscriberUri: process.env.BECKN_SUBSCRIBER_URI,
+    privateKey: process.env.BECKN_PRIVATE_KEY,
+    publicKey: process.env.BECKN_PUBLIC_KEY,
+    uniqueKey: process.env.BECKN_UNIQUE_KEY,
+    city: "std:080", // Bangalore city code
+    country: "IND"
+};
+
+// Initialize mobility service
+const mobilityService = new MobilityService(becknConfig);
 
 // Enable CORS for all routes with more specific options
 app.use(cors({
@@ -33,10 +56,10 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK' });
 });
 
+// New endpoint for cab fare comparison using Beckn Protocol
 app.post('/get-fare', async (req, res) => {
     try {
-        const pickup = req.body.pickup;
-        const drop = req.body.drop;
+        const { pickup, drop } = req.body;
 
         console.log('Received fare request:', {
             pickup,
@@ -51,79 +74,103 @@ app.post('/get-fare', async (req, res) => {
             });
         }
 
-        // Create data directory if it doesn't exist
+        // Convert addresses to GPS coordinates using Google Maps Geocoding
+        const pickupCoords = await geocodeAddress(pickup);
+        const dropCoords = await geocodeAddress(drop);
+
+        // Format coordinates for Beckn protocol
+        const pickupGPS = `${pickupCoords.lat},${pickupCoords.lng}`;
+        const dropGPS = `${dropCoords.lat},${dropCoords.lng}`;
+
+        // Search for cabs using Beckn protocol
+        const results = await mobilityService.searchCabs(pickupGPS, dropGPS);
+
+        // Save results to fares.json for compatibility
         const dataDir = path.join(__dirname, 'data');
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir);
-            console.log('Created data directory:', dataDir);
         }
+        fs.writeFileSync(path.join(dataDir, 'fares.json'), JSON.stringify(results, null, 2));
 
-        // Execute the main.js script with proper error handling
-        exec(`node main.js "${pickup}" "${drop}"`, { timeout: 60000 }, (error, stdout, stderr) => {
-            if (error) {
-                console.error('Error executing main.js:', {
-                    error: error.message,
-                    code: error.code,
-                    signal: error.signal
-                });
-                return res.status(500).json({
-                    error: 'Failed to fetch fare prices',
-                    details: error.message
-                });
-            }
-
-            console.log('main.js execution output:', stdout);
-            if (stderr) {
-                console.error('main.js stderr:', stderr);
-            }
-
-            // Read and parse fares.json
-            const faresPath = path.join(__dirname, 'data', 'fares.json');
-            console.log('Reading fares from:', faresPath);
-
-            fs.readFile(faresPath, 'utf8', (err, data) => {
-                if (err) {
-                    console.error('Error reading fares.json:', {
-                        error: err.message,
-                        code: err.code,
-                        path: faresPath
-                    });
-                    return res.status(500).json({
-                        error: 'Error reading fare data',
-                        details: err.message
-                    });
-                }
-
-                try {
-                    const fares = JSON.parse(data);
-                    console.log('Successfully parsed fares:', {
-                        services: fares.map(f => f.Service),
-                        timestamp: new Date().toISOString()
-                    });
-                    res.json(fares);
-                } catch (parseError) {
-                    console.error('Error parsing fares.json:', {
-                        error: parseError.message,
-                        data: data.substring(0, 100) + '...' // Log first 100 chars of data
-                    });
-                    res.status(500).json({
-                        error: 'Error parsing fare data',
-                        details: parseError.message
-                    });
-                }
-            });
-        });
+        res.json(results);
     } catch (error) {
-        console.error('Unexpected server error:', {
-            error: error.message,
-            stack: error.stack
-        });
+        console.error('Error processing fare request:', error);
         res.status(500).json({
-            error: 'Internal server error',
+            error: 'Failed to fetch fare prices',
             details: error.message
         });
     }
 });
+
+// Initialize booking
+app.post('/init-booking', async (req, res) => {
+    try {
+        const { provider, item } = req.body;
+        const result = await mobilityService.initBooking(provider, item);
+        res.json(result);
+    } catch (error) {
+        console.error('Error initializing booking:', error);
+        res.status(500).json({
+            error: 'Failed to initialize booking',
+            details: error.message
+        });
+    }
+});
+
+// Confirm booking
+app.post('/confirm-booking', async (req, res) => {
+    try {
+        const { bookingId } = req.body;
+        const result = await mobilityService.confirmBooking(bookingId);
+        res.json(result);
+    } catch (error) {
+        console.error('Error confirming booking:', error);
+        res.status(500).json({
+            error: 'Failed to confirm booking',
+            details: error.message
+        });
+    }
+});
+
+// Track booking
+app.get('/track-booking/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const result = await mobilityService.trackBooking(bookingId);
+        res.json(result);
+    } catch (error) {
+        console.error('Error tracking booking:', error);
+        res.status(500).json({
+            error: 'Failed to track booking',
+            details: error.message
+        });
+    }
+});
+
+// Helper function to geocode address using Google Maps
+async function geocodeAddress(address) {
+    try {
+        const response = await googleMapsClient.geocode({
+            params: {
+                address: address,
+                key: process.env.GOOGLE_MAPS_API_KEY
+            }
+        });
+
+        if (response.data.results && response.data.results.length > 0) {
+            const location = response.data.results[0].geometry.location;
+            return {
+                lat: location.lat,
+                lng: location.lng
+            };
+        } else {
+            throw new Error('No results found');
+        }
+    } catch (error) {
+        console.error('Geocoding error:', error.response ? error.response.data : error.message);
+        throw new Error(`Geocoding failed for address: ${address}`);
+    }
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -139,7 +186,43 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-    console.log(`API endpoints available at http://localhost:${port}/get-fare`);
+// Graceful shutdown function
+function shutdownGracefully() {
+    console.log('Shutting down gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+}
+
+// Handle shutdown signals
+process.on('SIGTERM', shutdownGracefully);
+process.on('SIGINT', shutdownGracefully);
+
+// Start server function
+function startServer(port) {
+    return new Promise((resolve, reject) => {
+        const server = app.listen(port)
+            .once('listening', () => {
+                console.log(`Server started successfully:`);
+                console.log(`- Local: http://localhost:${port}`);
+                console.log(`- API endpoint: http://localhost:${port}/get-fare`);
+                resolve(server);
+            })
+            .once('error', (err) => {
+                if (err.code === 'EADDRINUSE') {
+                    console.log(`Port ${port} is busy, trying ${port + 1}...`);
+                    server.close();
+                    startServer(port + 1).then(resolve).catch(reject);
+                } else {
+                    reject(err);
+                }
+            });
+    });
+}
+
+// Start the server with initial port
+startServer(3000).catch(err => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
 });

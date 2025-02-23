@@ -11,12 +11,14 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.0",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.18.3",
     "fs": "^0.0.1-security",
     "nodemailer": "^6.9.16",
     "puppeteer": "^23.7.0",
     "twilio": "^5.3.5"
-  },
-  "devDependencies": {}
+  }
 }

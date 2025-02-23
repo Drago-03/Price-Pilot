@@ -212,7 +212,7 @@ body::before {
 .form-control {
     background: var(--input-bg);
     border: 2px solid var(--input-border);
-    color: var(--text-light);
+    color: var(--text-light) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 12px;
@@ -220,6 +220,12 @@ body::before {
     font-size: 1.1rem;
     transition: all 0.3s ease;
     box-shadow: var(--input-shadow);
+}
+
+/* Form Control Placeholder Styling */
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
 }
 
 /* Form Control Focus States */
@@ -231,12 +237,7 @@ body::before {
         rgba(79, 70, 229, 0.1),
         rgba(225, 29, 72, 0.1)
     );
-}
-
-/* Form Control Placeholder Styling */
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 500;
+    color: var(--text-light) !important;
 }
 
 /* Custom Button Styling */
@@ -1801,6 +1802,7 @@ body::before {
     0% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
     100% { transform: translateY(0); }
+}
 }
 
 /* New Glow Animation */
