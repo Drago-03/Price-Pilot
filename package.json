@@ -1,24 +1,35 @@
 {
-  "name": "price-pilot",
-  "version": "1.0.0",
-  "description": "### Leaving somewhere? Use cab karo to find the best deal for your travel.. <hr><br> <img src=\"https://user-images.githubusercontent.com/49815429/115147185-6e7a6700-a077-11eb-9162-ad8f7fc1c59c.PNG\" width=\"500\" height=\"350\"/> <img src=\"https://user-images.githubusercontent.com/49815429/115147192-72a68480-a077-11eb-8473-826b318b1a09.PNG\" width=\"500\" height=\"350\"/>",
-  "license": "MIT",
-  "author": "",
-  "type": "commonjs",
-  "main": "main.js",
+  "name": "vite-react-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@googlemaps/google-maps-services-js": "^3.4.0",
-    "axios": "^1.7.9",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.18.3",
-    "fs": "^0.0.1-security",
-    "nodemailer": "^6.9.16",
-    "puppeteer": "^23.7.0",
-    "twilio": "^5.3.5"
+    "@googlemaps/js-api-loader": "^1.16.6",
+    "@types/google.maps": "^3.55.4",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0",
+    "vite": "^5.4.2"
   }
 }

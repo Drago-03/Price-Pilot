@@ -1,215 +1,190 @@
-# Price Pilot
+# Price Pilot 🚗 💰
 
-## Overview
+<div align="center">
+  <img src="assets/images/logo.png" alt="Price Pilot Logo" width="200">
+  <h3>Your Smart Ride Price Comparison Platform</h3>
+  <p>Compare ride prices across multiple services instantly</p>
+</div>
 
-Price Pilot is a web application that allows users to compare prices of various services. It currently supports cab service comparisons across multiple providers (Uber, Ola, and Rapido), with plans to expand to food delivery, grocery delivery, and medicine delivery services.
+## 🌟 Overview
 
-## Features
+Price Pilot is a modern web application that helps users make informed decisions about their rides by comparing prices across multiple ride-hailing services in real-time. Built with React, TypeScript, and Google Maps integration, it provides a seamless experience for finding the best ride prices.
 
-- Compare prices of various services in real-time
-- Get accurate fare estimates with ETA
-- User-friendly interface with modern design
-- Location-based service with map integration
-- Support for multiple service providers
-- Responsive design for all devices
-- Dark theme support
-- Real-time route visualization
-- Fare history tracking
+### Key Features
 
-### Current Services
-- **Cab Services**
-  - Uber
-  - Ola
-  - Rapido
+- **Real-time Price Comparison**: Compare prices across Uber, Ola, and Rapido
+- **Interactive Map Interface**: Powered by Google Maps API
+- **Smart Location Input**: Address autocomplete and current location detection
+- **Surge Price Detection**: Real-time surge pricing information
+- **Route Visualization**: View routes with distance and ETA
+- **One-Click Booking**: Direct redirection to service providers
+- **Responsive Design**: Works seamlessly across all devices
 
-### Coming Soon
-- **Food Delivery**
-  - Zomato
-  - Swiggy
-- **Grocery Delivery**
-  - BigBasket
-  - Instamart
-  - Blinkit
-  - Zepto
-- **Medicine Delivery**
-  - PharmEasy
-  - Netmeds
-  - 1mg
+## 🛠️ Technical Stack
 
-## Prerequisites
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with custom animations
+- **State Management**: React Context API
+- **Maps**: Google Maps JavaScript API & Places API
+- **Build Tool**: Vite
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- Google Maps API key
-- Modern web browser
-- Internet connection
+### APIs & Services
+- **Maps & Geocoding**: Google Maps Platform
+- **Ride Services**: 
+  - Uber Rides API
+  - Ola API
+  - Rapido API
 
-## Installation
+### Development Tools
+- **Language**: TypeScript 5.0+
+- **Linting**: ESLint with TypeScript support
+- **Formatting**: Prettier
+- **Testing**: Jest & React Testing Library
+- **API Testing**: Postman collections included
 
-1. Clone the repository
-```bash
-git clone https://github.com/Drago-03/Price-Pilot.git
-cd Price-Pilot
-```
+## 📋 Prerequisites
 
-2. Install dependencies
-```bash
-npm install
-```
+Before setting up Price Pilot, ensure you have:
 
-3. Set up environment variables
-```bash
-cp .env.example .env
-# Edit .env with your API keys and configuration
-```
+- Node.js (v16.0.0 or higher)
+- npm or yarn package manager
+- Google Maps API key with following APIs enabled:
+  - Maps JavaScript API
+  - Places API
+  - Directions API
+  - Geocoding API
 
-4. Start the server
-```bash
-npm start
-```
+## 🚀 Getting Started
 
-The application will be available at `http://localhost:3000`
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/price-pilot.git
+   cd price-pilot
+   ```
 
-## Configuration
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-### Environment Variables
-```env
-# Firebase Configuration
-FIREBASE_API_KEY=your_api_key
-FIREBASE_APP_ID=your_app_id
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_storage_bucket
+3. **Configure environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   VITE_UBER_CLIENT_ID=your_uber_client_id
+   VITE_OLA_API_KEY=your_ola_api_key
+   VITE_RAPIDO_API_KEY=your_rapido_api_key
+   ```
 
-# Backend Configuration
-BACKEND_URL=http://localhost:8000
-API_VERSION=v1
+4. **Start development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-# Redis Configuration
-REDIS_URL=redis://localhost:6379
+5. **Build for production**
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
 
-# API Keys
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-UBER_API_KEY=your_uber_api_key
-OLA_API_KEY=your_ola_api_key
-RAPIDO_API_KEY=your_rapido_api_key
-```
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-Price-Pilot/
-├── cab-modules/          # Cab service modules
-├── server/              # Backend server
-├── public/              # Static files
-├── src/                 # Source files
+price-pilot/
+├── src/
+│   ├── components/          # React components
+│   │   ├── Map/            # Map related components
+│   │   ├── Search/         # Search & autocomplete
+│   │   └── UI/             # Common UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── services/           # API integration services
+│   ├── utils/              # Helper functions
+│   ├── types/              # TypeScript definitions
+│   ├── App.tsx            # Main application component
+│   └── main.tsx          # Application entry point
+├── public/               # Static assets
 ├── tests/               # Test files
-├── docs/                # Documentation
-└── scripts/             # Utility scripts
+└── docs/                # Additional documentation
 ```
 
-## Usage
+## 🔧 Configuration
 
-1. Open the application in your browser
-2. Select the service you want to compare (e.g., Cabs)
-3. Enter pickup and drop-off locations
-4. Click "Compare Prices"
-5. View real-time price comparisons and choose the best option
+### Google Maps
 
-## API Documentation
+1. Create a project in Google Cloud Console
+2. Enable required APIs (Maps JavaScript, Places, Directions)
+3. Create API credentials
+4. Add restrictions to API key
+5. Update `.env` file with your key
 
-Detailed API documentation is available in the following files:
-- [Cab Modules Documentation](cab-modules/README.md)
-- [Technical Specification](cab-modules/TECHNICAL.md)
+### Ride Service APIs
 
-## Development
+Configure each ride service API in the `.env` file. Refer to their respective documentation:
+- [Uber API Documentation](https://developer.uber.com/docs)
+- [Ola API Documentation](https://developers.olacabs.com)
+- [Rapido API Documentation](https://rapidoapi.com/docs)
 
-### Running Tests
+## 🧪 Testing
+
+Run tests using:
 ```bash
-# Run all tests
-npm test
-
-# Run specific test suite
-npm run test:cab-modules
-npm run test:integration
-npm run test:e2e
+npm run test        # Run all tests
+npm run test:watch  # Run tests in watch mode
+npm run test:coverage # Generate coverage report
 ```
 
-### Code Style
-We use ESLint and Prettier for code formatting. Run:
-```bash
-# Check code style
-npm run lint
+## 📦 Deployment
 
-# Fix code style issues
-npm run lint:fix
-```
+1. Build the project
+   ```bash
+   npm run build
+   ```
 
-### Building for Production
-```bash
-# Build the application
-npm run build
+2. Deploy the `dist` folder to your hosting service
+   - Recommended: Vercel, Netlify, or GitHub Pages
+   - Enable environment variables in your hosting platform
 
-# Preview production build
-npm run preview
-```
-
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please follow these steps:
 
 1. Fork the repository
 2. Create a feature branch
-```bash
-git checkout -b feature/amazing-feature
-```
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
 3. Commit your changes
-```bash
-git commit -m 'Add amazing feature'
-```
+   ```bash
+   git commit -m 'Add some AmazingFeature'
+   ```
 4. Push to the branch
-```bash
-git push origin feature/amazing-feature
-```
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
 5. Open a Pull Request
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and development process.
-
-## Team
-
-- **Mantej Singh Arora** - Lead Developer
-- **Ishaan Sharma** - Backend Developer
-- **Gagandeep** - DevOps Engineer
-- **Ayush Saini** - UI/UX Designer
-- **Dhruv Pandey** - Quality Assurance
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - Google Maps Platform for mapping services
-- Bootstrap for UI components
-- Font Awesome for icons
-- All our service provider partners
+- All ride-hailing services for their APIs
+- The open-source community for inspiration and tools
 
-## Support
+## 📞 Support
 
-For support, please email mantejarora@gmail.com or open an issue in the repository.
+For support, email support@pricepilot.com or join our [Discord community](https://discord.gg/pricepilot).
 
-## Roadmap
+---
 
-- [ ] Add food delivery comparison
-- [ ] Implement grocery delivery services
-- [ ] Add medicine delivery comparison
-- [ ] Implement user accounts and history
-- [ ] Add fare prediction using ML
-- [ ] Implement real-time price tracking
-- [ ] Add price alerts feature
-- [ ] Develop mobile applications
-
-## Security
-
-Please report any security issues to mantejarora@gmail.com. Do not create public issues for security vulnerabilities.
-
+<div align="center">
+  Made with modern web technologies • Optimized for performance • Open source
+</div>
