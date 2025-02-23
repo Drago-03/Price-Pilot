@@ -1,18 +1,23 @@
+// Global variables for map and location services
 let map, directionsService, directionsRenderer;
 let autocompletePickup, autocompleteDrop;
 let locationModal, comparisonModal;
 
-// Initialize Google Maps and Autocomplete
+/**
+ * Initialize Google Maps and related services
+ * Sets up the map with custom styling and initializes direction services
+ */
 function initMap() {
-    // Initialize Bootstrap modals
+    // Initialize Bootstrap modals for location and comparison
     locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
     comparisonModal = new bootstrap.Modal(document.getElementById('comparisonModal'));
 
-    // Initialize the map centered on India
+    // Initialize the map with custom dark theme styling
     map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 20.5937, lng: 78.9629 },
+        center: { lat: 20.5937, lng: 78.9629 }, // Center on India
         zoom: 5,
         styles: [
+            // Dark theme map styles
             {
                 "featureType": "all",
                 "elementType": "geometry",
@@ -36,10 +41,11 @@ function initMap() {
         ]
     });
 
+    // Initialize directions service and renderer
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressMarkers: true,
+        suppressMarkers: true, // We'll add custom markers
         polylineOptions: {
             strokeColor: '#4f46e5',
             strokeWeight: 6,
@@ -47,20 +53,21 @@ function initMap() {
         }
     });
 
-    // Initialize autocomplete for pickup and drop locations
+    // Set up autocomplete for location inputs
     const pickupInput = document.getElementById('pickup');
     const dropInput = document.getElementById('drop');
 
     const autocompleteOptions = {
-        componentRestrictions: { country: "in" },
+        componentRestrictions: { country: "in" }, // Restrict to India
         fields: ["formatted_address", "geometry", "name"],
         strictBounds: false
     };
 
+    // Initialize autocomplete for both pickup and drop locations
     autocompletePickup = new google.maps.places.Autocomplete(pickupInput, autocompleteOptions);
     autocompleteDrop = new google.maps.places.Autocomplete(dropInput, autocompleteOptions);
 
-    // Add place_changed listeners
+    // Add place_changed event listeners
     autocompletePickup.addListener('place_changed', () => {
         const place = autocompletePickup.getPlace();
         if (!place.geometry) {
@@ -86,7 +93,10 @@ function initMap() {
     });
 }
 
-// Function to check location permission
+/**
+ * Check browser's geolocation permission status
+ * @returns {Promise<string>} Permission state ('granted', 'denied', or 'prompt')
+ */
 async function checkLocationPermission() {
     try {
         const result = await navigator.permissions.query({ name: 'geolocation' });
@@ -97,7 +107,10 @@ async function checkLocationPermission() {
     }
 }
 
-// Function to get current location
+/**
+ * Get user's current location using browser's geolocation API
+ * @returns {Promise<GeolocationPosition>} User's current position
+ */
 function getCurrentLocation() {
     return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(
@@ -128,27 +141,31 @@ function getCurrentLocation() {
     });
 }
 
-// Update the click handler for current location button
+// Event listener for the "Use My Location" button
 document.getElementById('currentLocationBtn').addEventListener('click', async function() {
     const button = this;
     const originalContent = button.innerHTML;
     
     try {
+        // Check if geolocation is supported
         if (!navigator.geolocation) {
             throw new Error("Geolocation is not supported by this browser.");
         }
 
+        // Check permission status
         const permissionStatus = await checkLocationPermission();
         
         if (permissionStatus === 'denied') {
             throw new Error('PERMISSION_DENIED');
         }
 
+        // Show permission modal if not granted
         if (permissionStatus === 'prompt') {
             locationModal.show();
             return;
         }
 
+        // Update button state and get location
         button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Location...';
         button.disabled = true;
 
@@ -157,19 +174,26 @@ document.getElementById('currentLocationBtn').addEventListener('click', async fu
     } catch (error) {
         showError(error);
     } finally {
+        // Reset button state
         button.innerHTML = originalContent;
         button.disabled = false;
     }
 });
 
-// Update map with markers and route
+/**
+ * Update map with markers and route visualization
+ * @param {google.maps.LatLng} pickupLocation - Pickup location coordinates
+ * @param {google.maps.LatLng} dropLocation - Drop-off location coordinates
+ */
 function updateMap(pickupLocation, dropLocation) {
     const pickup = pickupLocation || (autocompletePickup.getPlace() && autocompletePickup.getPlace().geometry.location);
     const drop = dropLocation || (autocompleteDrop.getPlace() && autocompleteDrop.getPlace().geometry.location);
 
     if (pickup && drop) {
+        // If both locations are available, calculate and display route
         calculateRoute(pickup, drop);
     } else if (pickup) {
+        // If only pickup location is available, center map and add marker
         map.setCenter(pickup);
         map.setZoom(15);
         new google.maps.Marker({
@@ -179,6 +203,7 @@ function updateMap(pickupLocation, dropLocation) {
             animation: google.maps.Animation.DROP
         });
     } else if (drop) {
+        // If only drop location is available, center map and add marker
         map.setCenter(drop);
         map.setZoom(15);
         new google.maps.Marker({
@@ -190,7 +215,11 @@ function updateMap(pickupLocation, dropLocation) {
     }
 }
 
-// Calculate and display route
+/**
+ * Calculate and display route between two points
+ * @param {google.maps.LatLng} pickup - Starting point coordinates
+ * @param {google.maps.LatLng} drop - Destination coordinates
+ */
 function calculateRoute(pickup, drop) {
     const request = {
         origin: typeof pickup === 'string' ? pickup : { lat: pickup.lat(), lng: pickup.lng() },
@@ -200,18 +229,19 @@ function calculateRoute(pickup, drop) {
 
     directionsService.route(request, (result, status) => {
         if (status === 'OK') {
+            // Display the route on the map
             directionsRenderer.setDirections(result);
             
             const route = result.routes[0];
             const leg = route.legs[0];
             
-            // Update route info
+            // Update route information display
             const routeInfo = document.getElementById('routeInfo');
             routeInfo.classList.remove('d-none');
             routeInfo.querySelector('.distance').textContent = `Distance: ${leg.distance.text}`;
             routeInfo.querySelector('.duration').textContent = `Duration: ${leg.duration.text}`;
             
-            // Fit map to route bounds
+            // Adjust map bounds to fit the route
             map.fitBounds(route.bounds);
         } else {
             alert("Could not calculate the route. Please try again.");
@@ -219,7 +249,10 @@ function calculateRoute(pickup, drop) {
     });
 }
 
-// Handle form submission for fare comparison
+/**
+ * Handle form submission for fare comparison
+ * Shows comparison modal and animates route display
+ */
 document.getElementById('cabBookingForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     const button = this.querySelector('button[type="submit"]');
@@ -228,23 +261,24 @@ document.getElementById('cabBookingForm').addEventListener('submit', async funct
     const drop = this.querySelector('input[placeholder="Enter drop location"]').value;
 
     try {
+        // Update button state
         button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Comparing...';
 
         // Show the comparison modal
         comparisonModal.show();
 
-        // First, update the map and zoom to India
+        // Initialize map view
         map.setCenter({ lat: 20.5937, lng: 78.9629 });
         map.setZoom(5);
 
-        // Wait for a moment to show the full map of India
+        // Add delay for visual effect
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Calculate and display the route
         await calculateAndDisplayRoute(pickup, drop);
 
-        // Fetch fare comparison
+        // Fetch fare comparison data
         const response = await fetch('/api/compare-fares', {
             method: 'POST',
             headers: {
@@ -261,6 +295,7 @@ document.getElementById('cabBookingForm').addEventListener('submit', async funct
         console.error('Error:', error);
         alert('Failed to fetch comparison. Please try again.');
     } finally {
+        // Reset button state
         button.disabled = false;
         button.innerHTML = originalContent;
     }
@@ -413,13 +448,29 @@ function showError(error) {
 }
 
 // Initialize map when page loads
-window.onload = initMap;
+function initializeApp() {
+    // Initialize Google Maps
+    if (typeof google === 'undefined') {
+        console.error('Google Maps not loaded');
+        return;
+    }
+    
+    try {
+        initMap();
+        initFoodDelivery();
+        initCabBooking();
+        initLocationHandling();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
+}
 
-// Initialize both forms
-document.addEventListener('DOMContentLoaded', function() {
-    initFoodDelivery();
-    initCabBooking();
-});
+// Wait for Google Maps to load
+if (window.google && window.google.maps) {
+    initializeApp();
+} else {
+    window.initializeApp = initializeApp;
+}
 
 // Food Delivery Functionality
 function initFoodDelivery() {
@@ -587,95 +638,108 @@ function displayCabResults(results) {
     });
 }
 
-// Location handling
-document.addEventListener('DOMContentLoaded', function() {
-    // Get all location buttons
+// Initialize location functionality
+function initLocationHandling() {
     const locationButtons = document.querySelectorAll('.use-location-btn');
     
     locationButtons.forEach(button => {
-        button.addEventListener('click', handleLocationRequest);
-    });
-});
+        button.addEventListener('click', async function(event) {
+            event.preventDefault();
+            const button = event.currentTarget;
+            const originalContent = button.innerHTML;
+            const form = button.closest('form');
+            const inputField = form.querySelector('input[placeholder*="pickup location"], input[placeholder*="delivery"]');
 
-async function handleLocationRequest(event) {
-    const button = event.currentTarget;
-    const originalContent = button.innerHTML;
-    const form = button.closest('form');
-    const inputField = form.querySelector('input[placeholder*="pickup location"], input[placeholder*="delivery"]');
-
-    try {
-        // Check if geolocation is supported
-        if (!navigator.geolocation) {
-            throw new Error("Geolocation is not supported by your browser");
-        }
-
-        // Check for permission status
-        const permissionStatus = await checkLocationPermission();
-        
-        if (permissionStatus === 'denied') {
-            showLocationModal();
-            return;
-        }
-
-        // Update button state
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Location...';
-
-        // Get current position
-        const position = await getCurrentLocation();
-        
-        // Initialize geocoder if not already initialized
-        const geocoder = new google.maps.Geocoder();
-        
-        // Convert coordinates to address
-        geocoder.geocode(
-            { location: { lat: position.coords.latitude, lng: position.coords.longitude } },
-            (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    const address = results[0].formatted_address;
-                    inputField.value = address;
-                    
-                    // If this is the cab booking form, update the map
-                    if (form.id === 'cabBookingForm') {
-                        updateMap(
-                            { lat: position.coords.latitude, lng: position.coords.longitude },
-                            null
-                        );
-                    }
-                    
-                    // Success feedback
-                    button.classList.add('btn-success');
-                    button.innerHTML = '<i class="fas fa-check me-2"></i>Location Found';
-                } else {
-                    throw new Error('Geocoding failed');
+            try {
+                // Check if geolocation is supported
+                if (!navigator.geolocation) {
+                    throw new Error("Geolocation is not supported by your browser");
                 }
-            }
-        );
-        
-        // Reset button after 2 seconds
-        setTimeout(() => {
-            button.classList.remove('btn-success');
-            button.disabled = false;
-            button.innerHTML = originalContent;
-        }, 2000);
 
-    } catch (error) {
-        console.error('Error getting location:', error);
-        
-        // Error feedback
-        button.classList.add('btn-danger');
-        button.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Location Error';
-        
-        // Show error message
-        showError(error);
-        
-        // Reset button after 2 seconds
-        setTimeout(() => {
-            button.classList.remove('btn-danger');
-            button.disabled = false;
-            button.innerHTML = originalContent;
-        }, 2000);
-    }
+                // Update button state
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Getting Location...';
+
+                // Get current position
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                });
+
+                // Initialize geocoder
+                const geocoder = new google.maps.Geocoder();
+                
+                // Convert coordinates to address
+                geocoder.geocode(
+                    { 
+                        location: { 
+                            lat: position.coords.latitude, 
+                            lng: position.coords.longitude 
+                        } 
+                    },
+                    (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            const address = results[0].formatted_address;
+                            inputField.value = address;
+                            
+                            // If this is the cab booking form, update the map
+                            if (form.id === 'cabBookingForm') {
+                                const location = { 
+                                    lat: position.coords.latitude, 
+                                    lng: position.coords.longitude 
+                                };
+                                updateMap(location, null);
+                            }
+                            
+                            // Success feedback
+                            button.classList.add('btn-success');
+                            button.innerHTML = '<i class="fas fa-check me-2"></i>Location Found';
+                            
+                            // Reset button after 2 seconds
+                            setTimeout(() => {
+                                button.classList.remove('btn-success');
+                                button.disabled = false;
+                                button.innerHTML = originalContent;
+                            }, 2000);
+                        } else {
+                            throw new Error('Could not get address for this location');
+                        }
+                    }
+                );
+
+            } catch (error) {
+                console.error('Error getting location:', error);
+                
+                // Error feedback
+                button.classList.add('btn-danger');
+                button.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Location Error';
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                errorDiv.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                button.parentNode.insertBefore(errorDiv, button.nextSibling);
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.classList.remove('btn-danger');
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                }, 2000);
+                
+                // Auto dismiss error after 5 seconds
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
+            }
+        });
+    });
 }
 
 function showLocationModal() {

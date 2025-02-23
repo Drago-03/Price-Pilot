@@ -1,37 +1,58 @@
-/* Modern Theme Variables */
+/* 
+ * Theme Variables
+ * Define color scheme, shadows, transitions, and other reusable values
+ * Using a dark theme with glass morphism effects
+ */
 :root {
+    /* Primary Colors */
     --primary-color: #4f46e5;    /* Deeper Indigo */
     --secondary-color: #e11d48;  /* Rich Rose */
     --accent-color: #0d9488;    /* Deep Teal */
+    
+    /* Status Colors */
     --success-color: #059669;   /* Emerald */
     --warning-color: #d97706;   /* Amber */
     --error-color: #dc2626;     /* Red */
+    
+    /* Background Colors */
     --background-start: #0f172a; /* Darker Slate */
     --background-mid: #1e1b4b;   /* Deep Purple */
     --background-end: #312e81;   /* Rich Indigo */
+    
+    /* UI Element Colors */
     --card-bg: rgba(15, 23, 42, 0.75);      /* Dark background with transparency */
     --card-bg-hover: rgba(15, 23, 42, 0.85); /* Darker on hover */
     --text-color: #f8fafc;      /* Light text for dark theme */
     --text-light: #f1f5f9;      /* Slightly dimmed white */
     --text-muted: #94a3b8;      /* Muted text for dark theme */
+    
+    /* Form Elements */
     --input-bg: rgba(59, 130, 246, 0.15);     /* Cool blue background */
     --input-bg-focus: rgba(99, 102, 241, 0.2); /* Deeper blue on focus */
     --input-border: rgba(147, 197, 253, 0.3);  /* Subtle blue border */
     --input-border-focus: rgba(147, 197, 253, 0.5); /* Brighter border on focus */
     --input-shadow: 0 0 15px rgba(59, 130, 246, 0.1); /* Subtle glow */
     --input-shadow-focus: 0 0 20px rgba(99, 102, 241, 0.2); /* Enhanced glow on focus */
+    
+    /* Glass Effect */
     --glass-bg: rgba(15, 23, 42, 0.85);     /* Dark glass effect */
     --glass-border: rgba(71, 85, 105, 0.2); /* Subtle borders */
+    
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #4f46e5, #e11d48);
     --gradient-secondary: linear-gradient(135deg, #0d9488, #4f46e5);
     --gradient-background: linear-gradient(135deg, 
         var(--background-start) 0%,
         var(--background-mid) 50%,
         var(--background-end) 100%);
+    
+    /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
     --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.25);
+    
+    /* Animations and Transitions */
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --hover-glow: 0 0 20px rgba(79, 70, 229, 0.4);
     --hover-glow-intense: 0 0 30px rgba(79, 70, 229, 0.6);
@@ -41,6 +62,7 @@
     --hover-rotate: rotate(3deg);
 }
 
+/* Base Styles */
 body {
     font-family: 'Poppins', sans-serif;
     background: var(--gradient-background);
@@ -50,6 +72,7 @@ body {
     color: var(--text-color);
 }
 
+/* Gradient overlay for the entire page */
 body::before {
     content: '';
     position: fixed;
@@ -63,7 +86,7 @@ body::before {
     pointer-events: none;
 }
 
-/* Festival Lights Animation */
+/* Festival Lights Animation - Decorative header effect */
 .festival-lights {
     position: fixed;
     top: 0;
@@ -83,7 +106,7 @@ body::before {
     100% { background-position: 200% 50%; }
 }
 
-/* Header Section */
+/* Header Section Styles */
 .header {
     padding: 2rem 0;
     background: rgba(15, 23, 42, 0.35);
@@ -95,6 +118,7 @@ body::before {
     z-index: 10;
 }
 
+/* Header gradient overlay */
 .header::before {
     content: '';
     position: absolute;
@@ -109,6 +133,7 @@ body::before {
     z-index: -1;
 }
 
+/* Brand Container - Logo and title wrapper */
 .brand-container {
     display: flex;
     align-items: center;
@@ -117,6 +142,7 @@ body::before {
     margin-bottom: 0.5rem;
 }
 
+/* Logo Animation */
 .brand-logo {
     height: 80px;
     width: auto;
@@ -124,6 +150,7 @@ body::before {
     animation: float 3s ease-in-out infinite;
 }
 
+/* Brand Title with gradient effect */
 .brand-title {
     font-size: 2.5rem;
     font-weight: 800;
@@ -134,6 +161,7 @@ body::before {
     text-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
 }
 
+/* Brand Tagline */
 .brand-tagline {
     color: var(--text-light);
     font-size: 1.2rem;
@@ -142,7 +170,7 @@ body::before {
     margin: 0;
 }
 
-/* Search Section */
+/* Search Section - Main content area for search functionality */
 .search-section {
     background-color: var(--light-bg);
     flex: 1;
@@ -150,6 +178,7 @@ body::before {
     position: relative;
 }
 
+/* Search Card - Container for search inputs */
 .search-card {
     background: rgba(15, 23, 42, 0.85);
     padding: 2rem;
@@ -162,6 +191,7 @@ body::before {
     transition: var(--transition);
 }
 
+/* Search Card Hover Effects */
 .search-card:hover {
     transform: var(--hover-translate);
     box-shadow: var(--hover-glow);
@@ -171,13 +201,14 @@ body::before {
     border-color: rgba(79, 70, 229, 0.3);
 }
 
+/* Search Title Styling */
 .search-title {
     margin-bottom: 2rem;
     color: var(--text-light);
     text-shadow: 0 0 10px rgba(147, 197, 253, 0.3);
 }
 
-/* Form Controls - Enhanced styling */
+/* Form Controls - Enhanced input styling */
 .form-control {
     background: var(--input-bg);
     border: 2px solid var(--input-border);
@@ -191,6 +222,7 @@ body::before {
     box-shadow: var(--input-shadow);
 }
 
+/* Form Control Focus States */
 .form-control:focus {
     transform: var(--hover-translate);
     box-shadow: var(--hover-glow);
@@ -201,12 +233,13 @@ body::before {
     );
 }
 
+/* Form Control Placeholder Styling */
 .form-control::placeholder {
     color: rgba(255, 255, 255, 0.6);
     font-weight: 500;
 }
 
-/* Custom Button */
+/* Custom Button Styling */
 .btn-custom {
     background: var(--gradient-primary);
     color: var(--text-light);
@@ -219,6 +252,7 @@ body::before {
     overflow: hidden;
 }
 
+/* Custom Button Hover Animation */
 .btn-custom::after {
     content: '';
     position: absolute;
@@ -645,12 +679,14 @@ body::before {
 @keyframes fadeIn {
     from { 
         opacity: 0; 
-        transform: translateY(10px); 
+        transform: translateY(10px);
+        -webkit-backdrop-filter: blur(0px);
         backdrop-filter: blur(0px);
     }
     to { 
         opacity: 1; 
-        transform: translateY(0); 
+        transform: translateY(0);
+        -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
     }
 }
