@@ -379,30 +379,84 @@ function displayFareResults(fares) {
             const item = document.createElement('div');
             item.className = 'list-group-item fade-in';
             item.style.animationDelay = `${(index * 0.2 + detailIndex * 0.1)}s`;
-            item.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <img src="./assets/images/${service.Service.toLowerCase()}.png" 
-                             alt="${service.Service}" 
-                             class="provider-logo me-3"
-                             onerror="this.src='./assets/images/fallback-cab.png'">
-                        <div>
-                            <h5 class="mb-1">${service.Service} ${detail.Type || ''}</h5>
-                            <p class="mb-1">ETA: ${detail.ETA}</p>
+            
+            // Handle error state
+            if (detail.Status === "Error") {
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <img src="./assets/images/${service.Service.toLowerCase()}.png" 
+                                 alt="${service.Service}" 
+                                 class="provider-logo me-3"
+                                 onerror="this.src='./assets/images/fallback-cab.png'">
+                            <div>
+                                <h5 class="mb-1">${service.Service}</h5>
+                                <p class="mb-1 text-danger">Service temporarily unavailable</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <h4 class="mb-1">₹${detail.Fare}</h4>
-                        <button class="btn btn-sm btn-outline-primary">Book Now</button>
+                `;
+            } else {
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <img src="./assets/images/${service.Service.toLowerCase()}.png" 
+                                 alt="${service.Service}" 
+                                 class="provider-logo me-3"
+                                 onerror="this.src='./assets/images/fallback-cab.png'">
+                            <div>
+                                <h5 class="mb-1">${service.Service} ${detail.Type || ''}</h5>
+                                <p class="mb-1">ETA: ${detail.ETA}</p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-1">₹${detail.Fare}</h4>
+                            <button class="btn btn-sm btn-outline-primary book-now-btn" 
+                                    data-service="${service.Service.toLowerCase()}"
+                                    data-type="${detail.Type || ''}"
+                                    onclick="handleBooking(this)">
+                                Book Now
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
+            
             fareList.appendChild(item);
         });
     });
     
     fareResults.classList.remove('d-none');
     fareResults.classList.add('slide-up');
+}
+
+// Handle booking button click
+function handleBooking(button) {
+    const service = button.dataset.service;
+    const type = button.dataset.type;
+    
+    // Get the current route information
+    const pickup = document.querySelector('input[placeholder="Enter pickup location"]').value;
+    const drop = document.querySelector('input[placeholder="Enter drop location"]').value;
+    
+    // Redirect to appropriate booking service
+    let bookingUrl;
+    switch(service) {
+        case 'uber':
+            bookingUrl = `https://m.uber.com/ul/?pickup=${encodeURIComponent(pickup)}&dropoff=${encodeURIComponent(drop)}`;
+            break;
+        case 'ola':
+            bookingUrl = `https://book.olacabs.com/?pickup=${encodeURIComponent(pickup)}&drop=${encodeURIComponent(drop)}`;
+            break;
+        case 'rapido':
+            bookingUrl = `https://app.rapido.bike/booking?pickup=${encodeURIComponent(pickup)}&drop=${encodeURIComponent(drop)}`;
+            break;
+        default:
+            alert('Booking service not available');
+            return;
+    }
+    
+    window.open(bookingUrl, '_blank');
 }
 
 // Function to show current position on map
@@ -511,15 +565,37 @@ function initCabBooking() {
         event.preventDefault();
         const button = this.querySelector('button[type="submit"]');
         const originalText = button.innerHTML;
+        const pickup = this.querySelector('input[placeholder="Enter pickup location"]').value;
+        const drop = this.querySelector('input[placeholder="Enter drop location"]').value;
 
         try {
             button.disabled = true;
             button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Comparing...';
 
-            // Simulate API call to cab services
-            const results = await compareCabPrices();
-            displayCabResults(results);
+            // Show the comparison modal
+            comparisonModal.show();
+
+            // Initialize map view and calculate route
+            await calculateAndDisplayRoute(pickup, drop);
+
+            // Fetch fare comparison data from backend
+            const response = await fetch('http://localhost:3000/get-fare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pickup, drop })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to fetch comparison');
+            }
+
+            const fares = await response.json();
+            displayFareResults(fares);
             
+            // Show results
             cabResults.style.display = 'block';
             cabResults.scrollIntoView({ behavior: 'smooth' });
         } catch (error) {

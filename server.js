@@ -9,9 +9,11 @@ const port = 3000;
 
 // Enable CORS for all routes with more specific options
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: '*', // Allow all origins in development
     methods: ['GET', 'POST'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400 // Cache preflight requests for 24 hours
 }));
 
 // Parse URL-encoded bodies and JSON
